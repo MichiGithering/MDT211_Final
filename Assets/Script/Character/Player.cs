@@ -1,11 +1,9 @@
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class Player : Character
 {
     private Vector2 input;
-
-    // DELETE THIS LINE: public int level = 1; 
-    // Do NOT put it back. The parent 'Character' script handles the level.
 
     public int exp = 0;
     public int lvbar = 100;
@@ -16,6 +14,7 @@ public class Player : Character
 
         if (ScoreManager.Instance != null)
             exp = ScoreManager.Instance.Score;
+
 
         if (exp >= lvbar)
             LevelUp();
