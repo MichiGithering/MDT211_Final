@@ -322987,7 +322987,6 @@ MonoBehaviour:
   defense: 0
   moveSpeed: 8
   attackCooldown: 1
-  level: 1
   exp: 0
   lvbar: 100
 --- !u!114 &1584319750

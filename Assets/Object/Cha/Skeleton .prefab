@@ -139,8 +139,10 @@ MonoBehaviour:
   ExpDrop: 20
   DetectRange: 20
   AttackRange: 1.5
+  attackCooldown: 1
   currentState: 0
-  target: {fileID: 0}
+  target: {fileID: 6144008559638352867, guid: d3633db6bd57be249af396a7b78a4b47, type: 3}
+  patrolSpeed: 1
 --- !u!50 &3533969240717319022
 Rigidbody2D:
   serializedVersion: 5

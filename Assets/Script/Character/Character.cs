@@ -14,14 +14,13 @@ public abstract class Character : MonoBehaviour
     [SerializeField] protected float defense = 0f;
     [SerializeField] protected float moveSpeed = 5f;
 
-    // NEW: Variable to control how fast the character can attack (in seconds)
+    [Header("Combat")]
     [SerializeField] protected float attackCooldown = 1.0f;
+    protected float lastAttackTime = -999f;
 
     protected Rigidbody2D rb;
 
-    // NEW: Variable to track the exact time the last attack happened
-    protected float lastAttackTime = -999f;
-
+    // Public Properties
     public string Name => characterName;
     public int Level => level;
     public float MaxHP => maxHP;
@@ -29,10 +28,7 @@ public abstract class Character : MonoBehaviour
     public float AttackDamage => attack;
     public float Defense => defense;
     public float MoveSpeed => moveSpeed;
-
-    // NEW: Public property so other scripts can read the cooldown
     public float AttackCooldown => attackCooldown;
-
     public bool IsDead => currentHP <= 0f;
 
     protected virtual void Awake()
@@ -46,9 +42,15 @@ public abstract class Character : MonoBehaviour
     {
         if (IsDead) return;
 
+        // Try to move if input is strong enough
         if (direction.sqrMagnitude > 0.01f)
         {
             direction.Normalize();
+
+            // DEBUG: This line will tell us if the code is running!
+            // Check your Console when the enemy is chasing.
+            // Debug.Log($"{characterName} moving! Speed: {moveSpeed}, Dir: {direction}");
+
             Vector2 targetPosition = rb.position + (direction * moveSpeed * Time.fixedDeltaTime);
             rb.MovePosition(targetPosition);
         }
@@ -87,7 +89,6 @@ public abstract class Character : MonoBehaviour
         attack = newAttack;
         defense = newDefense;
         moveSpeed = newMoveSpeed;
-
         currentHP = Mathf.Clamp(currentHP, 0f, maxHP);
     }
 }

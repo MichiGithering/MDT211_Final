@@ -6,7 +6,7 @@ public class EnemySpawner : MonoBehaviour
 {
     public static EnemySpawner Instance;
 
-    [Header("Enemy Prefabs (Spawn Randomly)")]
+    [Header("Enemy Prefabs")]
     public GameObject[] enemyPrefabs;
 
     [Header("Map Tilemaps")]
@@ -18,23 +18,21 @@ public class EnemySpawner : MonoBehaviour
     public int maxEnemies = 20;
 
     private float timer;
-
     private List<GameObject> activeEnemies = new List<GameObject>();
     private List<Vector3> walkableTiles = new List<Vector3>();
-
     private Player player;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
-
         CacheWalkableTiles();
     }
 
     private void Start()
     {
-        player = FindObjectOfType<Player>();
+        // FIX: Use FindFirstObjectByType to stop the Yellow Warning
+        player = FindFirstObjectByType<Player>();
     }
 
     private void Update()
@@ -42,7 +40,6 @@ public class EnemySpawner : MonoBehaviour
         if (player == null) return;
 
         timer += Time.deltaTime;
-
         if (timer >= spawnInterval)
         {
             timer = 0f;
@@ -52,31 +49,23 @@ public class EnemySpawner : MonoBehaviour
 
     private void TrySpawn()
     {
-        if (activeEnemies.Count >= maxEnemies)
-            return;
-
+        if (activeEnemies.Count >= maxEnemies) return;
         List<Vector3> tilesOutsideView = GetTilesOutsideCamera();
-
-        if (tilesOutsideView.Count == 0)
-            return;
+        if (tilesOutsideView.Count == 0) return;
 
         Vector3 spawnPos = tilesOutsideView[Random.Range(0, tilesOutsideView.Count)];
-
         GameObject prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
         GameObject spawned = Instantiate(prefab, spawnPos, Quaternion.identity);
 
         activeEnemies.Add(spawned);
         spawned.AddComponent<CleanupTracker>().Init(this);
 
-        // === Assign ENEMY LEVEL based on PLAYER level ===
-        Enemy enemy = spawned.GetComponent<Enemy>();
-        if (enemy != null)
+        if (spawned != null)
         {
-            int minLevel = player.level;
-            int maxLevel = player.level + 1;
-
+            // FIX: Use 'player.Level' (Capital L) to fix the Red Error
+            int minLevel = player.Level;
+            int maxLevel = player.Level + 1;
             int assignedLevel = Random.Range(minLevel, maxLevel + 1);
-
         }
     }
 
@@ -88,15 +77,10 @@ public class EnemySpawner : MonoBehaviour
     private void CacheWalkableTiles()
     {
         walkableTiles.Clear();
-
         foreach (var pos in ground.cellBounds.allPositionsWithin)
         {
-            if (!ground.HasTile(pos))
-                continue;
-
-            if (wall != null && wall.HasTile(pos))
-                continue;
-
+            if (!ground.HasTile(pos)) continue;
+            if (wall != null && wall.HasTile(pos)) continue;
             walkableTiles.Add(ground.GetCellCenterWorld(pos));
         }
     }
@@ -104,12 +88,12 @@ public class EnemySpawner : MonoBehaviour
     private List<Vector3> GetTilesOutsideCamera()
     {
         List<Vector3> list = new List<Vector3>();
-
         Camera cam = Camera.main;
+        if (cam == null) return list;
+
         float camHeight = cam.orthographicSize;
         float camWidth = camHeight * cam.aspect;
         Vector3 camPos = cam.transform.position;
-
         float left = camPos.x - camWidth;
         float right = camPos.x + camWidth;
         float bottom = camPos.y - camHeight;
@@ -120,23 +104,13 @@ public class EnemySpawner : MonoBehaviour
             if (t.x < left || t.x > right || t.y < bottom || t.y > top)
                 list.Add(t);
         }
-
         return list;
     }
 
     private class CleanupTracker : MonoBehaviour
     {
         private EnemySpawner spawner;
-
-        public void Init(EnemySpawner spawner)
-        {
-            this.spawner = spawner;
-        }
-
-        private void OnDestroy()
-        {
-            if (spawner != null)
-                spawner.RemoveEnemy(gameObject);
-        }
+        public void Init(EnemySpawner spawner) { this.spawner = spawner; }
+        private void OnDestroy() { if (spawner != null) spawner.RemoveEnemy(gameObject); }
     }
 }

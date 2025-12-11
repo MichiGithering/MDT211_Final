@@ -4,18 +4,19 @@ public class Player : Character
 {
     private Vector2 input;
 
-    public int level = 1;
+    // DELETE THIS LINE: public int level = 1; 
+    // Do NOT put it back. The parent 'Character' script handles the level.
+
     public int exp = 0;
     public int lvbar = 100;
 
     void Update()
     {
-        // Handle movement input
         input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
-        // Read EXP & Level
         if (ScoreManager.Instance != null)
             exp = ScoreManager.Instance.Score;
+
         if (exp >= lvbar)
             LevelUp();
     }
@@ -32,11 +33,12 @@ public class Player : Character
 
     public void LevelUp()
     {
-        level++;
+        level++; // This works because 'level' is in the parent script
 
-        ScoreManager.Instance.ResetScore();
+        if (ScoreManager.Instance != null)
+            ScoreManager.Instance.ResetScore();
+
         exp = 0;
-
         lvbar = 100 + (10 * (level - 1));
     }
 }
