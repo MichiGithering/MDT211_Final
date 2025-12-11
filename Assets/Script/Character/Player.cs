@@ -1,18 +1,25 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : Character
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    private Vector2 input;
 
-    // Update is called once per frame
+
     void Update()
     {
-        
+        // Get 2D input (WASD / Arrow Keys)
+        input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+    }
+
+    void FixedUpdate()
+    {
+        // Call Character.Move using input
+        Move(input);
+    }
+
+    public override void AttackTarget(Character target)
+    {
+        throw new System.NotImplementedException();
     }
 }
+

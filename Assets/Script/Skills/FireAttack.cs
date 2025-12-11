@@ -58,7 +58,7 @@ public class FireAttack : MonoBehaviour
 
         private float timer;
 
-        private int fixedDamage = 2; // damage = 2
+        private int fixedDamage = 50; // damage = 2
 
         private SpriteRenderer sprite;
 
