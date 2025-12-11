@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
+using UnityEngine.SceneManagement;
 
 public class Player : Character
 {
@@ -14,7 +14,6 @@ public class Player : Character
 
         if (ScoreManager.Instance != null)
             exp = ScoreManager.Instance.Score;
-
 
         if (exp >= lvbar)
             LevelUp();

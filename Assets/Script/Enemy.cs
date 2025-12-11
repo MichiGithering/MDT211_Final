@@ -1,4 +1,6 @@
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum AIState
 {
@@ -117,7 +119,7 @@ public class Enemy : Character
     public void DropLoot()
     {
         Debug.Log($"{Name} dropped loot and {ExpDrop} EXP.");
-        ScoreManager.Instance.AddScore(20);
+        ScoreManager.Instance.AddScore(ExpDrop);
 
     }
 
