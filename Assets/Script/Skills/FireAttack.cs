@@ -6,99 +6,88 @@ public class FireAttack : MonoBehaviour
     public GameObject fireProjectilePrefab;
     public Transform firePoint;
     public float projectileSpeed = 10f;
-    public float projectileLifeTime = 5f;
-
-    [Header("Cooldown")]
     public float cooldown = 2f;
-    private float nextAllowedTime = 0f;
 
+    private float nextAttackTime;
     private Character owner;
-    private SpriteRenderer ownerRenderer;
 
     private void Awake()
     {
         owner = GetComponent<Character>();
-        ownerRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) && Time.time >= nextAttackTime)
         {
-            TryAttack();
+            nextAttackTime = Time.time + cooldown;
+            Shoot();
         }
     }
 
-    private void TryAttack()
+    private void Shoot()
     {
-        if (Time.time < nextAllowedTime) return;
+        if (!fireProjectilePrefab || !firePoint)
+        {
+            Debug.LogWarning("FireAttack: Missing fireProjectilePrefab or firePoint.");
+            return;
+        }
 
-        nextAllowedTime = Time.time + cooldown;
+        GameObject obj = Instantiate(fireProjectilePrefab, firePoint.position, Quaternion.identity);
 
-        ShootProjectile();
+        // Get mouse world direction
+        Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mouse.z = 0f;
+        Vector3 dir = (mouse - firePoint.position).normalized;
+        if (dir == Vector3.zero) dir = Vector3.right;
+
+        // Rotate projectile toward direction
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        obj.transform.rotation = Quaternion.Euler(0, 0, angle);
+
+        // Add the internal ProjectileLogic class
+        var proj = obj.AddComponent<ProjectileLogic>();
+        proj.Setup(owner, dir * projectileSpeed);
     }
 
-    private void ShootProjectile()
-    {
-        GameObject obj = Instantiate(fireProjectilePrefab, firePoint.position, firePoint.rotation);
-
-        // Add projectile logic directly
-        var projectile = obj.AddComponent<ProjectileLogic>();
-
-        // Determine direction by SpriteRenderer.flipX
-        float direction = ownerRenderer != null && ownerRenderer.flipX ? -1f : 1f;
-
-        projectile.Initialize(owner, projectileSpeed * direction, projectileLifeTime);
-    }
+    // -------------------------------------------------------------
+    // INTERNAL CLASS: ProjectileLogic stays inside FireAttack.cs
+    // -------------------------------------------------------------
     private class ProjectileLogic : MonoBehaviour
     {
         private Character owner;
-        private float speed;
-        private float lifeTime;
+        private Vector3 velocity;
 
-        private float timer;
+        private const int damage = 50;
 
-        private int fixedDamage = 50; // damage = 2
-
-        private SpriteRenderer sprite;
-
-        public void Initialize(Character owner, float speed, float lifeTime)
+        public void Setup(Character owner, Vector3 velocity)
         {
             this.owner = owner;
-            this.speed = speed;
-            this.lifeTime = lifeTime;
+            this.velocity = velocity;
 
-            sprite = GetComponent<SpriteRenderer>();
-
-            // กลับด้าน sprite ตามทิศ
-            if (sprite != null)
-            {
-                sprite.flipX = speed < 0;
-            }
+            SpriteRenderer sprite = GetComponent<SpriteRenderer>();
+            if (sprite) sprite.flipX = velocity.x < 0;
         }
 
         private void Update()
         {
-            // เดินไปทางขวาหรือซ้ายตาม speed ตลอดเวลา
-            transform.Translate(Vector3.right * speed * Time.deltaTime);
-
-            // นับเวลา
-            timer += Time.deltaTime;
-
-            // ถ้าเกิน lifeTime (เช่น 5 วิ) ให้ลบกระสุน
-            if (timer >= lifeTime)
-                Destroy(gameObject);
+            transform.position += velocity * Time.deltaTime;
         }
 
-        private void OnTriggerEnter2D(Collider2D other)
+        private void OnTriggerEnter2D(Collider2D col)
         {
-            Character target = other.GetComponent<Character>();
-
-            if (target != null && target != owner)
+            Character target = col.GetComponent<Character>();
+            if (target && target != owner)
             {
-                target.TakeDamage(fixedDamage);
+                target.TakeDamage(damage);
                 Destroy(gameObject);
             }
+        }
+
+        // Destroy when leaving camera view
+        private void OnBecameInvisible()
+        {
+            Destroy(gameObject);
         }
     }
 }

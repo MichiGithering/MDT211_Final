@@ -4,16 +4,24 @@ public class Player : Character
 {
     private Vector2 input;
 
+    public int level = 1;
+    public int exp = 0;
+    public int lvbar = 100;
 
     void Update()
     {
-        // Get 2D input (WASD / Arrow Keys)
+        // Handle movement input
         input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+
+        // Read EXP & Level
+        if (ScoreManager.Instance != null)
+            exp = ScoreManager.Instance.Score;
+        if (exp >= lvbar)
+            LevelUp();
     }
 
     void FixedUpdate()
     {
-        // Call Character.Move using input
         Move(input);
     }
 
@@ -21,5 +29,14 @@ public class Player : Character
     {
         throw new System.NotImplementedException();
     }
-}
 
+    public void LevelUp()
+    {
+        level++;
+
+        ScoreManager.Instance.ResetScore();
+        exp = 0;
+
+        lvbar = 100 + (10 * (level - 1));
+    }
+}

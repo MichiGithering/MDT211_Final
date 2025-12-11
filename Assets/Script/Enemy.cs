@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public enum AIState
 {
@@ -13,8 +14,8 @@ public class Enemy : Character
 {
     [Header("Enemy Settings")]
     public int ExpDrop = 20;
-    public float DetectRange = 5f;
-    // Keep this small (e.g., 0.8f) so they stop close to the player
+    public float DetectRange = 30f;
+
     public float AttackRange = 0.8f;
 
     [Header("AI")]
@@ -116,7 +117,9 @@ public class Enemy : Character
 
     public void DropLoot()
     {
-        Debug.Log($"{Name} dropped loot and {ExpDrop} EXP.");
+        Debug.Log($"{Name} dropped loot and {ExpDrop} EXP."); 
+        ScoreManager.Instance.AddScore(15);
+
     }
 
     public void SetState(AIState state)
@@ -130,5 +133,6 @@ public class Enemy : Character
         base.OnDeath();
         SetState(AIState.Dead);
         DropLoot();
+        GameObject.Destroy(gameObject);
     }
 }
